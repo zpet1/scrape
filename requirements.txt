@@ -3,3 +3,4 @@ pytz
 yfinance
 cme-fedwatch
 playwright
+tf-playwright-stealth
