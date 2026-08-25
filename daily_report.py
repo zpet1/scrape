@@ -80,20 +80,32 @@ def get_fedwatch_raw_table():
 
     url = "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
     try:
+        from playwright_stealth import stealth_sync
+    except ImportError:
+        stealth_sync = None
+        print("[fedwatch] playwright-stealth not installed -- proceeding without fingerprint patching")
+
+    try:
         with sync_playwright() as p:
             # --disable-http2: cmegroup.com's HTTP/2 connections have been
-            # observed resetting mid-navigation from headless Chromium
-            # (net::ERR_HTTP2_PROTOCOL_ERROR) -- almost certainly a WAF/CDN
-            # rejecting something about the automated connection signature
-            # over HTTP/2. Forcing HTTP/1.1 avoids that path entirely.
-            browser = p.chromium.launch(args=["--disable-http2"])
+            # observed resetting mid-navigation from headless Chromium.
+            # --disable-blink-features=AutomationControlled: hides the most
+            # common headless-Chromium fingerprint (navigator.webdriver).
+            browser = p.chromium.launch(
+                args=["--disable-http2", "--disable-blink-features=AutomationControlled"]
+            )
             page = browser.new_page(
                 user_agent=(
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
                 ),
                 viewport={"width": 1400, "height": 1000},
+                locale="en-US",
             )
+            page.set_extra_http_headers({"Accept-Language": "en-US,en;q=0.9"})
+            if stealth_sync is not None:
+                stealth_sync(page)  # patches navigator.webdriver, plugins, etc.
+                print("[fedwatch] stealth patching applied")
 
             print(f"[fedwatch] loading {url}")
             last_error = None
