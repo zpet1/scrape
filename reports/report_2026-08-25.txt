@@ -1,8 +1,8 @@
-PRE-MARKET REPORT -- Tuesday, August 25, 2026 14:19 EDT
+PRE-MARKET REPORT -- Tuesday, August 25, 2026 14:29 EDT
 ============================================================
 
 --- VIX ---
-15.56 (as of 2026-08-25 13:04 CDT)
+15.54 (as of 2026-08-25 13:13 CDT)
 
 --- CME FedWatch ---
 [Raw table scrape failed -- falling back to cme_fedwatch API summary]
