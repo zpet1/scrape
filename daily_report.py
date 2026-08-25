@@ -6,9 +6,10 @@ Combines three things into one text file:
      (same feeds, same time-window/timezone logic, same filtering).
   2. VIX level -- via yfinance.
   3. CME FedWatch rate-probability table -- via the `cme-fedwatch` package
-     (unofficial, but pulls from CME settlement + FRED, no Selenium/scraping
-     of the JS-heavy QuikStrike widget, which is what the CME page actually
-     embeds and is not realistically scrapable with requests/BeautifulSoup).
+     (unofficial, but pulls from CME settlement + FRED, no browser/scraping
+     of the JS-heavy QuikStrike widget CME actually embeds -- that widget
+     blocks cloud-server IPs outright, so scraping it isn't viable from a
+     free automated job; see conversation history for what was tried).
 
 Designed to run unattended on a schedule (see .github/workflows/daily_report.yml).
 Because GitHub Actions cron is UTC-only and ET shifts with daylight saving,
@@ -59,127 +60,8 @@ def get_vix():
         return f"UNAVAILABLE -- error: {e}"
 
 
-def get_fedwatch_raw_table():
-    """Scrape the EXACT raw probability table text off the live CME FedWatch
-    page -- same numbers/columns (Now, 1 Day, 1 Week, 1 Month) and same rate
-    tiers a human would see and copy-paste, including near-zero tiers like
-    400-425 that the cme_fedwatch package's free feed can't reliably show.
-
-    The tool itself is a JS widget (quikstrike.net) inside an iframe, so a
-    plain HTTP request just gets an empty shell -- this uses a real headless
-    browser to render it first. Returns the raw text block, or None if
-    anything about the page/widget didn't load as expected (site changed,
-    slow network, bot-blocking, etc.) so the caller can fall back to the
-    API-based summary.
-
-    Prints diagnostics to stdout either way -- those show up in the GitHub
-    Actions log (not in the report file itself) so failures are debuggable
-    instead of silent.
-    """
-    from playwright.sync_api import sync_playwright
-
-    url = "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
-    try:
-        from playwright_stealth import stealth_sync
-    except ImportError:
-        stealth_sync = None
-        print("[fedwatch] playwright-stealth not installed -- proceeding without fingerprint patching")
-
-    try:
-        with sync_playwright() as p:
-            # --disable-http2: cmegroup.com's HTTP/2 connections have been
-            # observed resetting mid-navigation from headless Chromium.
-            # --disable-blink-features=AutomationControlled: hides the most
-            # common headless-Chromium fingerprint (navigator.webdriver).
-            browser = p.chromium.launch(
-                args=["--disable-http2", "--disable-blink-features=AutomationControlled"]
-            )
-            page = browser.new_page(
-                user_agent=(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-                ),
-                viewport={"width": 1400, "height": 1000},
-                locale="en-US",
-            )
-            page.set_extra_http_headers({"Accept-Language": "en-US,en;q=0.9"})
-            if stealth_sync is not None:
-                stealth_sync(page)  # patches navigator.webdriver, plugins, etc.
-                print("[fedwatch] stealth patching applied")
-
-            print(f"[fedwatch] loading {url}")
-            last_error = None
-            for attempt in range(3):
-                try:
-                    page.goto(url, wait_until="domcontentloaded", timeout=60000)
-                    last_error = None
-                    break
-                except Exception as e:
-                    last_error = e
-                    print(f"[fedwatch] goto attempt {attempt + 1} failed: {type(e).__name__}: {e}")
-                    page.wait_for_timeout(2000)
-            if last_error is not None:
-                print(f"[fedwatch] FAILURE: page.goto failed after 3 attempts -- {type(last_error).__name__}: {last_error}")
-                browser.close()
-                return None
-
-            print(f"[fedwatch] page loaded, status ok. Frames after load: {[f.url for f in page.frames]}")
-
-            for selector in ["#onetrust-accept-btn-handler", "text=Accept All Cookies", "text=Accept"]:
-                try:
-                    page.click(selector, timeout=3000)
-                    print(f"[fedwatch] dismissed cookie banner via {selector}")
-                    break
-                except Exception:
-                    continue
-
-            frame = None
-            for i in range(40):  # up to ~20s for the iframe to appear
-                for f in page.frames:
-                    if "quikstrike" in (f.url or ""):
-                        frame = f
-                        break
-                if frame:
-                    break
-                page.wait_for_timeout(500)
-
-            print(f"[fedwatch] frames after waiting: {[f.url for f in page.frames]}")
-
-            if frame is None:
-                print("[fedwatch] FAILURE: no quikstrike iframe ever appeared "
-                      "(likely bot-blocked, or the page never got that far in headless mode)")
-                browser.close()
-                return None
-
-            try:
-                frame.wait_for_selector("text=Target Rate", timeout=30000)
-            except Exception as e:
-                print(f"[fedwatch] FAILURE: found the iframe but 'Target Rate' text never rendered "
-                      f"inside it within 30s -- {type(e).__name__}: {e}")
-                browser.close()
-                return None
-
-            text = frame.inner_text("body")
-            browser.close()
-            print(f"[fedwatch] SUCCESS: pulled {len(text)} chars of frame text")
-
-        start = text.find("Target Rate")
-        if start == -1:
-            print("[fedwatch] FAILURE: got frame text but couldn't find 'Target Rate' in it")
-            return None
-        end = text.find("Data as of")
-        if end == -1:
-            return text[start:start + 2000].strip()
-        end = text.find("\n", end)
-        return text[start: end if end != -1 else len(text)].strip()
-    except Exception as e:
-        print(f"[fedwatch] FAILURE: unhandled exception -- {type(e).__name__}: {e}")
-        return None
-
-
 def get_fedwatch():
     """Next-meeting probabilities + short lookback history via cme_fedwatch.
-    Used only as a fallback if the raw-table scrape fails.
     Returns a formatted multi-line string; never raises."""
     try:
         from cme_fedwatch import get_probabilities, get_history
@@ -240,12 +122,7 @@ def build_report():
     lines.append(get_vix())
 
     lines.append("\n--- CME FedWatch ---")
-    raw_table = get_fedwatch_raw_table()
-    if raw_table:
-        lines.append(raw_table)
-    else:
-        lines.append("[Raw table scrape failed -- falling back to cme_fedwatch API summary]")
-        lines.append(get_fedwatch())
+    lines.append(get_fedwatch())
 
     lines.append(f"\n--- Headlines ({len(headlines)}) ---")
     for source, time_str, title in headlines:
