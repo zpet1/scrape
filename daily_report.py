@@ -81,7 +81,12 @@ def get_fedwatch_raw_table():
     url = "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch()
+            # --disable-http2: cmegroup.com's HTTP/2 connections have been
+            # observed resetting mid-navigation from headless Chromium
+            # (net::ERR_HTTP2_PROTOCOL_ERROR) -- almost certainly a WAF/CDN
+            # rejecting something about the automated connection signature
+            # over HTTP/2. Forcing HTTP/1.1 avoids that path entirely.
+            browser = p.chromium.launch(args=["--disable-http2"])
             page = browser.new_page(
                 user_agent=(
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -91,7 +96,21 @@ def get_fedwatch_raw_table():
             )
 
             print(f"[fedwatch] loading {url}")
-            page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            last_error = None
+            for attempt in range(3):
+                try:
+                    page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                    last_error = None
+                    break
+                except Exception as e:
+                    last_error = e
+                    print(f"[fedwatch] goto attempt {attempt + 1} failed: {type(e).__name__}: {e}")
+                    page.wait_for_timeout(2000)
+            if last_error is not None:
+                print(f"[fedwatch] FAILURE: page.goto failed after 3 attempts -- {type(last_error).__name__}: {last_error}")
+                browser.close()
+                return None
+
             print(f"[fedwatch] page loaded, status ok. Frames after load: {[f.url for f in page.frames]}")
 
             for selector in ["#onetrust-accept-btn-handler", "text=Accept All Cookies", "text=Accept"]:
