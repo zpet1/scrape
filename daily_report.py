@@ -89,11 +89,16 @@ def get_fedwatch():
         else:
             lines.append("\n[No upcoming meeting data returned]")
 
-        lookback = hist.get("lookback") or {}
+        lookback = hist.get("lookback") or []
         if lookback:
-            lines.append("\nLookback comparison (probability of no-change column, where available):")
-            for period, snapshot in lookback.items():
-                lines.append(f"  {period}: {snapshot}")
+            lines.append("\nLookback comparison:")
+            for snap in lookback:
+                label = snap.get("label")
+                trade_date = snap.get("trade_date")
+                probs_str = ", ".join(
+                    f"{rate_range}: {pct}%" for rate_range, pct in snap.get("probabilities", {}).items()
+                )
+                lines.append(f"  {label} (as of {trade_date}): {probs_str}")
         else:
             lines.append("\n[No lookback/history data available -- CME's free feed only retains ~5 business days]")
 
