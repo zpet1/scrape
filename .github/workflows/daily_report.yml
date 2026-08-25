@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Install headless browser (for the FedWatch page scrape)
+        run: python -m playwright install --with-deps chromium
+
       - name: Run report
         # FORCE_RUN=1 only applies to manual (workflow_dispatch) runs, so a
         # manual test always produces output regardless of what time it is.
