@@ -1,47 +1,33 @@
-name: Daily pre-market report
+Run if [ "workflow_dispatch" = "workflow_dispatch" ]; then
+[fedwatch] loading https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html
+[fedwatch] FAILURE: unhandled exception -- Error: Page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html
+Call log:
+  - navigating to "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html", waiting until "domcontentloaded"
 
-on:
-  schedule:
-    # GitHub Actions cron is UTC-only; ET shifts with daylight saving, so we
-    # trigger at both candidate times every weekday and let daily_report.py
-    # decide (via should_run_now()) which one is actually ~9:25am ET.
-    - cron: "25 13 * * 1-5"   # 9:25am ET during EDT (roughly Mar-Nov)
-    - cron: "25 14 * * 1-5"   # 9:25am ET during EST (roughly Nov-Mar)
-  workflow_dispatch:          # lets you trigger it manually from the Actions tab to test
+Wrote reports/report_2026-08-25.txt
+PRE-MARKET REPORT -- Tuesday, August 25, 2026 14:29 EDT
+============================================================
 
-permissions:
-  contents: write
+--- VIX ---
+15.54 (as of 2026-08-25 13:13 CDT)
 
-jobs:
-  run-report:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+--- CME FedWatch ---
+[Raw table scrape failed -- falling back to cme_fedwatch API summary]
+EFFR: 3.63%   Current target: 3.50%-3.75%
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+Next meeting: 2026-09-16  (contract ZQU6)
+Current probabilities:
+  3.50%-3.75%: 60.0%
+  3.75%-4.00%: 40.0%
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+Lookback comparison:
+  1d (as of 2026-08-24): 3.50%-3.75%: 60.0%, 3.75%-4.00%: 40.0%
+  1w (as of 2026-08-18): 3.50%-3.75%: 68.0%, 3.75%-4.00%: 32.0%
 
-      - name: Install headless browser (for the FedWatch page scrape)
-        run: python -m playwright install --with-deps chromium
-
-      - name: Run report
-        # FORCE_RUN=1 only applies to manual (workflow_dispatch) runs, so a
-        # manual test always produces output regardless of what time it is.
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            FORCE_RUN=1 python daily_report.py
-          else
-            python daily_report.py
-          fi
-
-      - name: Commit report if one was written
-        run: |
-          git config user.name "premarket-report-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add reports/
-          git diff --cached --quiet || git commit -m "Add report $(date -u +%Y-%m-%d)"
-          git push
+--- Headlines (6) ---
+[08:07 ET] (Yahoo Finance) Gold prices today, Tuesday, August 25, 2026: Gold hits 3-month high this morning
+[08:15 ET] (Yahoo Finance) Silver prices today, Tuesday, August 25, 2026: Silver prices pull back slightly, but remain over $68
+[08:33 ET] (Yahoo Finance) Bitcoin and ethereum prices today, Tuesday, August 25, 2026: Highest opening for bitcoin in over three months
+[09:00 ET] (CNBC Top News) Apple announces new Mac Mini and Mac Studio models with AI upgrades
+[09:00 ET] (CNBC Top News) To cram more AI skills onto LinkedIn profiles, more job seekers are turning to 'time travel,' say researchers
+[09:09 ET] (CNBC Top News) United Airlines adds 2027 flights spanning Sardinia to Okinawa. Here's what it says about travel today
