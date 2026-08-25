@@ -59,8 +59,70 @@ def get_vix():
         return f"UNAVAILABLE -- error: {e}"
 
 
+def get_fedwatch_raw_table():
+    """Scrape the EXACT raw probability table text off the live CME FedWatch
+    page -- same numbers/columns (Now, 1 Day, 1 Week, 1 Month) and same rate
+    tiers a human would see and copy-paste, including near-zero tiers like
+    400-425 that the cme_fedwatch package's free feed can't reliably show.
+
+    The tool itself is a JS widget (quikstrike.net) inside an iframe, so a
+    plain HTTP request just gets an empty shell -- this uses a real headless
+    browser to render it first. Returns the raw text block, or None if
+    anything about the page/widget didn't load as expected (site changed,
+    slow network, etc.) so the caller can fall back to the API-based summary.
+    """
+    from playwright.sync_api import sync_playwright
+
+    url = "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(url, wait_until="networkidle", timeout=60000)
+
+            # Dismiss a cookie-consent overlay if one shows up, so it doesn't
+            # block the widget from rendering underneath it.
+            for selector in ["#onetrust-accept-btn-handler", "text=Accept All Cookies", "text=Accept"]:
+                try:
+                    page.click(selector, timeout=3000)
+                    break
+                except Exception:
+                    continue
+
+            # The tool renders inside an iframe pointing at quikstrike.net.
+            frame = None
+            for _ in range(20):  # give the iframe a few seconds to appear
+                for f in page.frames:
+                    if "quikstrike" in (f.url or ""):
+                        frame = f
+                        break
+                if frame:
+                    break
+                page.wait_for_timeout(500)
+
+            if frame is None:
+                browser.close()
+                return None
+
+            frame.wait_for_selector("text=Target Rate", timeout=30000)
+            text = frame.inner_text("body")
+            browser.close()
+
+        start = text.find("Target Rate")
+        if start == -1:
+            return None
+        end = text.find("Data as of")
+        if end == -1:
+            return text[start:start + 2000].strip()
+        end = text.find("\n", end)
+        return text[start: end if end != -1 else len(text)].strip()
+    except Exception:
+        return None
+
+
 def get_fedwatch():
     """Next-meeting probabilities + short lookback history via cme_fedwatch.
+    Used only as a fallback if the raw-table scrape fails.
     Returns a formatted multi-line string; never raises."""
     try:
         from cme_fedwatch import get_probabilities, get_history
@@ -121,7 +183,12 @@ def build_report():
     lines.append(get_vix())
 
     lines.append("\n--- CME FedWatch ---")
-    lines.append(get_fedwatch())
+    raw_table = get_fedwatch_raw_table()
+    if raw_table:
+        lines.append(raw_table)
+    else:
+        lines.append("[Raw table scrape failed -- falling back to cme_fedwatch API summary]")
+        lines.append(get_fedwatch())
 
     lines.append(f"\n--- Headlines ({len(headlines)}) ---")
     for source, time_str, title in headlines:
