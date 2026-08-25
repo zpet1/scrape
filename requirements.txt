@@ -1,0 +1,4 @@
+feedparser
+pytz
+yfinance
+cme-fedwatch
