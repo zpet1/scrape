@@ -1,70 +1,25 @@
-PRE-MARKET REPORT -- Tuesday, August 25, 2026 09:25 EDT
+PRE-MARKET REPORT -- Tuesday, August 25, 2026 14:12 EDT
 ============================================================
 
 --- VIX ---
-15.83 (as of 2026-08-25 08:10 CDT)
+15.56 (as of 2026-08-25 12:57 CDT)
 
 --- CME FedWatch ---
-UNAVAILABLE -- error: 'list' object has no attribute 'items'
+EFFR: 3.63%   Current target: 3.50%-3.75%
 
---- Headlines (60) ---
-[08:00 ET] (CNBC Top News) Nvidia’s dependence on hyperscalers faces big test in earnings report
-[08:00 ET] (Yahoo Finance) Cybersecurity Stocks Are Priced For Big AI Growth. Earnings Could Bring Fireworks.
-[08:01 ET] (Yahoo Finance) Salesforce Faces An Earnings Test As AI Agents Reshape Its Business
+Next meeting: 2026-09-16  (contract ZQU6)
+Current probabilities:
+  3.50%-3.75%: 60.0%
+  3.75%-4.00%: 40.0%
+
+Lookback comparison:
+  1d (as of 2026-08-24): 3.50%-3.75%: 60.0%, 3.75%-4.00%: 40.0%
+  1w (as of 2026-08-18): 3.50%-3.75%: 68.0%, 3.75%-4.00%: 32.0%
+
+--- Headlines (6) ---
 [08:07 ET] (Yahoo Finance) Gold prices today, Tuesday, August 25, 2026: Gold hits 3-month high this morning
-[08:09 ET] (Yahoo Finance) Google expands Gemini AI platform for law firms, lawyers
-[08:14 ET] (MarketWatch Top) Oil prices decline as investors brush aside Bessent’s ‘economic D-Day’ threat against Iran
 [08:15 ET] (Yahoo Finance) Silver prices today, Tuesday, August 25, 2026: Silver prices pull back slightly, but remain over $68
-[08:15 ET] (Yahoo Finance) Nvidia stock is on a 7-day losing streak ahead of its big earnings report
-[08:15 ET] (Yahoo Finance) Equinor Eyes Major Oil Discovery Offshore Namibia
-[08:16 ET] (MarketWatch Top) My father-in-law passed away, leaving a house with tenants. Do I evict them?
-[08:20 ET] (Yahoo Finance) Vanguard Total Stock Market Index Fund Admiral Shares (VTSAX): What Investors Should Know
-[08:21 ET] (Yahoo Finance) Scooter’s Coffee Names Anna Faktorovich Chief Marketing Officer
-[08:22 ET] (MarketWatch Top) Major Alibaba figures make purchases as Chinese giant sells $10 billion of stock
-[08:23 ET] (CNBC Top News) Here are Tuesday's biggest analyst calls: Nvidia, SpaceX, Netflix, Marvell, AMD, Coinbase, Moderna & more
-[08:23 ET] (Yahoo Finance) payabl. integrates Visa RDR to resolve disputes before chargebacks
-[08:25 ET] (Yahoo Finance) JPMorgan predicts booming humanoid robot demand in U.S. manufacturing
-[08:26 ET] (Yahoo Finance) Tesla Hikes Prices For Struggling Cybertruck; Stock Faces Key Test
-[08:28 ET] (Yahoo Finance) Visa and Mastercard stocks close at record highs in August 2026
-[08:30 ET] (MarketWatch Top) Yes, the government can take your home after a Medicaid recipient dies. Here’s how to protect yourself.
-[08:30 ET] (Yahoo Finance) Oura smart ring IPO could raise $3 billion at $16 billion valuation
-[08:30 ET] (Yahoo Finance) RBC warns on German consumer weakness, cuts H&M and JD Sports forecasts
-[08:30 ET] (Yahoo Finance) 2 Stocks That Could Double by 2030
-[08:33 ET] (MarketWatch Top) Trump’s trade war with Canada could lead the U.S. back to quantitative easing
 [08:33 ET] (Yahoo Finance) Bitcoin and ethereum prices today, Tuesday, August 25, 2026: Highest opening for bitcoin in over three months
-[08:37 ET] (Yahoo Finance) Fiat Ventures combines venture and advisory divisions into new brand, raises $35M Fund II
-[08:39 ET] (Yahoo Finance) Dollar fragile as investors weigh Iran sanctions, Treasury buybacks
-[08:40 ET] (MarketWatch Top) Stick with value stocks until everyone starts talking about them — they’re still under the radar, this Wall Street firm says
-[08:41 ET] (Yahoo Finance) Falling, Falling, Falling: Why One of Wall Street’s Biggest Ratings Agencies Expects Bloom Energy to Explode 70% Higher
-[08:42 ET] (CNBC Top News) China needs U.S. dollars but is building a hedge against Washington’s sanctions
-[08:42 ET] (CNBC Markets) China needs U.S. dollars but is building a hedge against Washington’s sanctions
-[08:42 ET] (Yahoo Finance) Bloom Energy Climbs 5% on Nancy Pelosi Disclosure, FuelCell Rises 4%, Plug Power Advances 2%
-[08:42 ET] (Yahoo Finance) Qualcomm Is Poised for a Breakout in 2027
-[08:44 ET] (Yahoo Finance) Cerebras System’s Choppy Year Continues But a Wall Street Pro Forecasts 80% Returns Moving Forward
-[08:44 ET] (Yahoo Finance) Gemini Just Turned On Native XRP Ledger Transfers in Singapore
-[08:44 ET] (Investing.com) Earnings call transcript: Gabler Group tops H1 2026 sales guidance, shares rise
-[08:45 ET] (Investing.com) Earnings call transcript: Jacktel posts strong Q2 2026 revenue beat as shares rise
-[08:50 ET] (Yahoo Finance) Stock Market Today: Dow Rises As Treasury Yields Fall; Nvidia, Micron, Sandisk Rally (Live Coverage)
-[08:50 ET] (Yahoo Finance) Warren Buffett Continues to Load Up on Alphabet, and This 1 Number Is the Big Reason Why
-[08:52 ET] (Yahoo Finance) Nvidia Notches Longest Losing Streak Since 2022. Tomorrow’s Earnings Could Make It Worse
-[08:52 ET] (Investing.com) Earnings call transcript: Dermapharm H1 2026 profit growth lifts shares
-[08:54 ET] (Yahoo Finance) Porsche sells MHP consulting unit to TCS in $1.5 billion AI deal
-[08:55 ET] (Investing.com) European stocks trade at one-week highs as sanctions threat proves toothless
-[08:56 ET] (MarketWatch Top) Investors poured into Canadian ETFs right before trade talks broke down
-[08:56 ET] (Yahoo Finance) Salesforce Is Still Undervalued Despite a 28% Gain Over the Past Month
-[08:56 ET] (Investing.com) Oil prices decline as markets digest wider U.S. sanctions on Iran
-[08:57 ET] (Investing.com) Europe A&D roundup: Airbus strike resumes, BAE wins Italy rocket approval
-[08:59 ET] (CNBC Top News) Jim Cramer's top 10 things to watch in the stock market Tuesday
 [09:00 ET] (CNBC Top News) Apple announces new Mac Mini and Mac Studio models with AI upgrades
 [09:00 ET] (CNBC Top News) To cram more AI skills onto LinkedIn profiles, more job seekers are turning to 'time travel,' say researchers
-[09:01 ET] (Investing.com) U.S. Home Prices Rise More Than Expected, Boosting Market Confidence
-[09:02 ET] (Yahoo Finance) Tuniu Q2 Earnings Call Highlights
-[09:02 ET] (Yahoo Finance) Vipshop Q2 Earnings Call Highlights
-[09:02 ET] (Investing.com) Cantor Fitzgerald reiterates Overweight on CrowdStrike stock at $250
-[09:07 ET] (CNBC Top News) Canada poised to retaliate against Trump tariffs: 'We're not waiting by the phone'
 [09:09 ET] (CNBC Top News) United Airlines adds 2027 flights spanning Sardinia to Okinawa. Here's what it says about travel today
-[09:09 ET] (Investing.com) Earnings call transcript: Cadeler posts strong H1 2026 results, shares jump 8%
-[09:13 ET] (Investing.com) Gold wavers as investors await U.S. inflation, Warsh speech
-[09:15 ET] (MarketWatch Top) ‘She looked into COBRA’: My friend was laid off and lost her health insurance. How can she find affordable coverage?
-[09:19 ET] (CNBC Top News) Stock futures rise as Treasury yields decline, chipmakers gain ahead of Nvidia earnings: Live updates
-[09:20 ET] (CNBC Top News) Oil drops 3% as U.S. shifts to economic pressure on Iran, easing fears of renewed war
