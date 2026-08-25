@@ -1,11 +1,10 @@
-PRE-MARKET REPORT -- Tuesday, August 25, 2026 14:50 EDT
+PRE-MARKET REPORT -- Tuesday, August 25, 2026 15:09 EDT
 ============================================================
 
 --- VIX ---
-15.47 (as of 2026-08-25 13:35 CDT)
+15.45 (as of 2026-08-25 13:54 CDT)
 
 --- CME FedWatch ---
-[Raw table scrape failed -- falling back to cme_fedwatch API summary]
 EFFR: 3.63%   Current target: 3.50%-3.75%
 
 Next meeting: 2026-09-16  (contract ZQU6)
