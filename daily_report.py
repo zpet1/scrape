@@ -69,7 +69,12 @@ def get_fedwatch_raw_table():
     plain HTTP request just gets an empty shell -- this uses a real headless
     browser to render it first. Returns the raw text block, or None if
     anything about the page/widget didn't load as expected (site changed,
-    slow network, etc.) so the caller can fall back to the API-based summary.
+    slow network, bot-blocking, etc.) so the caller can fall back to the
+    API-based summary.
+
+    Prints diagnostics to stdout either way -- those show up in the GitHub
+    Actions log (not in the report file itself) so failures are debuggable
+    instead of silent.
     """
     from playwright.sync_api import sync_playwright
 
@@ -77,21 +82,28 @@ def get_fedwatch_raw_table():
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch()
-            page = browser.new_page()
-            page.goto(url, wait_until="networkidle", timeout=60000)
+            page = browser.new_page(
+                user_agent=(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                ),
+                viewport={"width": 1400, "height": 1000},
+            )
 
-            # Dismiss a cookie-consent overlay if one shows up, so it doesn't
-            # block the widget from rendering underneath it.
+            print(f"[fedwatch] loading {url}")
+            page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            print(f"[fedwatch] page loaded, status ok. Frames after load: {[f.url for f in page.frames]}")
+
             for selector in ["#onetrust-accept-btn-handler", "text=Accept All Cookies", "text=Accept"]:
                 try:
                     page.click(selector, timeout=3000)
+                    print(f"[fedwatch] dismissed cookie banner via {selector}")
                     break
                 except Exception:
                     continue
 
-            # The tool renders inside an iframe pointing at quikstrike.net.
             frame = None
-            for _ in range(20):  # give the iframe a few seconds to appear
+            for i in range(40):  # up to ~20s for the iframe to appear
                 for f in page.frames:
                     if "quikstrike" in (f.url or ""):
                         frame = f
@@ -100,23 +112,37 @@ def get_fedwatch_raw_table():
                     break
                 page.wait_for_timeout(500)
 
+            print(f"[fedwatch] frames after waiting: {[f.url for f in page.frames]}")
+
             if frame is None:
+                print("[fedwatch] FAILURE: no quikstrike iframe ever appeared "
+                      "(likely bot-blocked, or the page never got that far in headless mode)")
                 browser.close()
                 return None
 
-            frame.wait_for_selector("text=Target Rate", timeout=30000)
+            try:
+                frame.wait_for_selector("text=Target Rate", timeout=30000)
+            except Exception as e:
+                print(f"[fedwatch] FAILURE: found the iframe but 'Target Rate' text never rendered "
+                      f"inside it within 30s -- {type(e).__name__}: {e}")
+                browser.close()
+                return None
+
             text = frame.inner_text("body")
             browser.close()
+            print(f"[fedwatch] SUCCESS: pulled {len(text)} chars of frame text")
 
         start = text.find("Target Rate")
         if start == -1:
+            print("[fedwatch] FAILURE: got frame text but couldn't find 'Target Rate' in it")
             return None
         end = text.find("Data as of")
         if end == -1:
             return text[start:start + 2000].strip()
         end = text.find("\n", end)
         return text[start: end if end != -1 else len(text)].strip()
-    except Exception:
+    except Exception as e:
+        print(f"[fedwatch] FAILURE: unhandled exception -- {type(e).__name__}: {e}")
         return None
 
 
